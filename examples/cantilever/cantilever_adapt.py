@@ -8,7 +8,7 @@ import fireshape.zoo as fsz
 import ROL
 
 from PDEconstraint import LinearElasticitySolver
-from objective import Compliance
+from objective import Compliance, DiagnosticReducedObjective
 
 # setup problem
 
@@ -30,12 +30,10 @@ def shape_optimize(mesh):
 
 
     # create PDE-constrained objective functional
-    J_ = None
     def cb():
         out.write(e.solution)
-        print("Compliance:", assemble(J_.value_form()))
     J_ = Compliance(e, Q, cb=cb)
-    J = ReducedObjective(J_, e)
+    J = DiagnosticReducedObjective(J_, e)
 
     # add regularization to improve mesh quality
     Jq = fsz.MoYoSpectralConstraint(100, Constant(0.5), Q)
@@ -73,10 +71,11 @@ def shape_optimize(mesh):
 
 from animate import RiemannianMetric, adapt
 
+bpvd = fd.File('before.pvd', adaptive=True)
 fpvd = fd.File('sol.pvd', adaptive=True)
-sol = Function(FunctionSpace(mesh, "CG", 1), name='State')
-fpvd.write(sol)
 for i in range(20):
+    sol = Function(FunctionSpace(mesh, "CG", 1), name='State')
+    bpvd.write(sol)
 
     sol = shape_optimize(mesh)
     fpvd.write(sol)

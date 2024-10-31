@@ -1,5 +1,5 @@
 from firedrake import *
-from fireshape import ShapeObjective
+from fireshape import ShapeObjective, ReducedObjective
 from PDEconstraint import LinearElasticitySolver
 import numpy as np
 
@@ -27,3 +27,8 @@ class Compliance(ShapeObjective):
             return inner(sigma_u, eps_u)*dx
         else:
             return np.nan * dx(self.pde_solver.mesh_m)
+
+class DiagnosticReducedObjective(ReducedObjective):
+    def derivative(self, out):
+        super().derivative(out)
+        print("Compliance:", assemble(self.J.value_form()))
