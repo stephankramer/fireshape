@@ -222,7 +222,7 @@ class FeControlSpace(ControlSpace):
             fun = fd.Cofunction(self.V_c_dual)
         else:
             fun = fd.Cofunction(self.V_r_dual)
-        fun *= 0.
+        fun.assign(0)
         return fun
 
     def get_space_for_inner(self):
@@ -855,3 +855,10 @@ class ControlVector(ROL.Vector):
     def __str__(self):
         """String representative, so we can call print(vec)."""
         return self.vec_ro()[:].__str__()
+
+    def reduce(self, r, r0):
+        return self.data._reduce(r, r0)
+
+    def applyBinary(self, f, inp):
+        self.data._applyBinary(f, inp.data)
+
